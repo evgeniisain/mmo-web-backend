@@ -1,5 +1,7 @@
 <?php
 
+$container = require __DIR__ . '/container.php';
+$modules   = require __DIR__ . '/modules.php';
 $params = require __DIR__ . '/params.php';
 if (file_exists(__DIR__ . '/params-local.php')) {
 	$params = array_merge($params, require __DIR__ . '/params-local.php');
@@ -11,67 +13,75 @@ if (file_exists(__DIR__ . '/db-local.php')) {
 }
 
 $config = [
-    'id' => 'basic',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
-    'aliases' => [
+    'id'         => 'basic',
+    'basePath'   => dirname(__DIR__),
+    'bootstrap'  => ['log'],
+    'aliases'    => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'container'  => $container,
+    'modules'    => $modules,
     'components' => [
-        'request' => [
+        'request'      => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'FcMjaOiCXaD_y26NyFM0kp9_lK_5nGUW',
         ],
-        'cache' => [
+        'cache'        => [
             'class' => 'yii\caching\FileCache',
         ],
-        'user' => [
-            'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+        'user'         => [
+            'identityClass' => \app\modules\auth\models\User::class,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        'mailer' => [
-            'class' => 'yii\swiftmailer\Mailer',
+        'mailer'       => [
+            'class'            => 'yii\swiftmailer\Mailer',
             // send all mails to a file by default. You have to set
             // 'useFileTransport' to false and configure a transport
             // for the mailer to send real emails.
             'useFileTransport' => true,
         ],
-        'log' => [
+        'log'          => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [
+            'targets'    => [
                 [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'class'  => 'yii\log\FileTarget',
+                    'levels' => [
+                        'error',
+                        'warning',
+                    ],
                 ],
             ],
         ],
-        'db' => $db,
-        /*
-        'urlManager' => [
+        'db'           => $db,
+        'jwt'          => [
+            'class' => \bizley\jwt\Jwt::class,
+            'key'   => '@app/config/jwt/public.pem',
+        ],
+        'urlManager'   => [
             'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'rules' => [
+            'showScriptName'  => false,
+            'rules'           => [
+                'api/v<version:[0-9]>/<module>/login' => '<module>/api-v<version>/login',
+                'api/v<version:[0-9]>/<module>/check-auth' => '<module>/api-v<version>/check-auth',
             ],
         ],
-        */
     ],
-    'params' => $params,
+    'params'     => $params,
 ];
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'debug';
+    $config['bootstrap'][]      = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];
 
-    $config['bootstrap'][] = 'gii';
+    $config['bootstrap'][]    = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
