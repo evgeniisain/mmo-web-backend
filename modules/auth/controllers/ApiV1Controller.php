@@ -3,16 +3,15 @@
 namespace app\modules\auth\controllers;
 
 use app\controllers\ApiController;
-use app\helpers\ModelHelper;
-use app\models\api\ApiResponse;
 use app\modules\auth\components\PasswordEncoderInterface;
-use app\modules\auth\models\LoginForm;
+use app\modules\auth\models\RegisterForm;
 use app\modules\auth\models\User;
 use app\modules\auth\models\UserCreditinals;
 use app\modules\auth\models\UserData;
 use bizley\jwt\Jwt;
-use http\Exception\UnexpectedValueException;
 use Yii;
+use yii\validators\StringValidator;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -28,11 +27,9 @@ class ApiV1Controller extends ApiController {
     public function __construct(
         $id,
         $module,
-        Jwt $jwt,
         PasswordEncoderInterface $passwordEncoder,
         $config = []
     ) {
-        $this->jwt             = $jwt;
         $this->passwordEncoder = $passwordEncoder;
 
         parent::__construct($id, $module, $config);
@@ -67,6 +64,35 @@ class ApiV1Controller extends ApiController {
 	        return $userData;
         }
 
-	    throw new UnexpectedValueException();
+	    throw new BadRequestHttpException();
+    }
+
+    public function actionRegister() {
+	    $form = new RegisterForm();
+
+	    if ($form->load(Yii::$app->request->post(), '') && $form->validate()) {
+            $newUser           = new User();
+            $newUser->login    = $form->username;
+            $newUser->password = $this->passwordEncoder->encode($form->password);
+            if ($newUser->save()) {
+                return $newUser->id;
+            }
+
+            throw new BadRequestHttpException();
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    public function actionCheckUsername() {
+	    $username = Yii::$app->request->post('username');
+
+        if ((new StringValidator())->validate($username)) {
+            $user = User::findOne([User::ATTR_LOGIN => $username]);
+
+            return (null !== $user);
+        }
+
+        throw new BadRequestHttpException();
     }
 }
