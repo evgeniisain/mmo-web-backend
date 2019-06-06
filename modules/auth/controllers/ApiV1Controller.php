@@ -10,6 +10,9 @@ use app\modules\auth\models\UserCreditinals;
 use app\modules\auth\models\UserData;
 use bizley\jwt\Jwt;
 use Yii;
+use yii\filters\Cors;
+use yii\filters\VerbFilter;
+use yii\log\Logger;
 use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -23,6 +26,19 @@ class ApiV1Controller extends ApiController {
     protected $jwt;
 
     protected $passwordEncoder;
+
+    public function behaviors() {
+        return array_merge(parent::behaviors(), [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'check-auth'     => ['POST'],
+                    'register'       => ['POST'],
+                    'check-username' => ['POST'],
+                ],
+            ],
+        ]);
+    }
 
     public function __construct(
         $id,

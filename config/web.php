@@ -60,10 +60,9 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName'  => false,
             'rules'           => [
-                'api/v<version:[0-9]>/<module>/login' => '<module>/api-v<version>/login',
-                'api/v<version:[0-9]>/<module>/check-auth' => '<module>/api-v<version>/check-auth',
-                'api/v<version:[0-9]>/<module>/register' => '<module>/api-v<version>/register',
-                'api/v<version:[0-9]>/<module>/check-username' => '<module>/api-v<version>/check-username',
+                'api/v<version:[0-9]>/<module>/check-auth'      => '<module>/api-v<version>/check-auth',
+                'api/v<version:[0-9]>/<module>/register/'       => '<module>/api-v<version>/register',
+                'api/v<version:[0-9]>/<module>/check-username/' => '<module>/api-v<version>/check-username',
             ],
         ],
     ],
